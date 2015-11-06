@@ -71,8 +71,6 @@ public class convexHull
 	    			
 	    			return coordinate;
 				}
-				
-				
     		}
     	});
     	
