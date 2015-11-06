@@ -55,14 +55,24 @@ public class convexHull
     			//Split line into x and y
 				String[] xy = line.split(",");
 				
-				//Convert x and y to doubles
-    			double x = Double.parseDouble(xy[0]);
-    			double y = Double.parseDouble(xy[1]);
-    			
-    			//Create array with single coordinate using x and y
-    			Coordinate[] coordinate = { new Coordinate(x, y) };
-    			
-    			return coordinate;
+				//Return empty array for first line
+				if (xy[0].equals("x") || xy[1].equals("y"))
+				{
+					return new Coordinate[0];
+				}
+				else
+				{
+					//Convert x and y to doubles
+	    			double x = Double.parseDouble(xy[0]);
+	    			double y = Double.parseDouble(xy[1]);
+	    			
+	    			//Create array with single coordinate using x and y
+	    			Coordinate[] coordinate = { new Coordinate(x, y) };
+	    			
+	    			return coordinate;
+				}
+				
+				
     		}
     	});
     	
