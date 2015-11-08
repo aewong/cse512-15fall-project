@@ -20,15 +20,15 @@ import com.vividsolutions.jts.geom.LineSegment;
 
 import scala.Tuple2;
 
-public class ClosestPair {
+public class RangeQuery {
 	private static final String HDFS_ROOT_PATH = "hdfs://192.168.184.165:54310/";
 
 	private static final String LOCAL_PATH = "";
-	private static final String DEFAULT_INPUT_FILE = LOCAL_PATH + "closestpair_input.csv";
-	private static final String DEFAULT_OUTPUT_FILE = LOCAL_PATH + "closestpair_output.csv";
+	private static final String DEFAULT_INPUT_FILE = LOCAL_PATH + "rangequery_input.csv";
+	private static final String DEFAULT_OUTPUT_FILE = LOCAL_PATH + "rangequery_output.csv";
 
 	private static final boolean LOCAL_SPARK = true;
-	private static final String SPARK_APP_NAME = "ClosestPair";
+	private static final String SPARK_APP_NAME = "RangeQuery";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 	
