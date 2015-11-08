@@ -54,7 +54,8 @@ public class JTSUtils {
 			return null;
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(coords[3].x).append(", ").append(coords[3].y).append(", ").append(coords[1].x).append(", ").append(coords[1].y);
+		sb.append("{").append(coords[3].x).append(", ").append(coords[3].y)
+		.append("}, {").append(coords[1].x).append(", ").append(coords[1].y).append("}");
 		return sb.toString();
 	}
 
