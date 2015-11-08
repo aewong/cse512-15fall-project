@@ -1,12 +1,15 @@
 package edu.asu.cse512;
 
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
@@ -20,13 +23,15 @@ import com.vividsolutions.jts.geom.Geometry;
  *
  */
 public class Union {
-	private static final String HDFS_ROOT_PATH = "hdfs://192.168.184.165:54310/";
-
+	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
 	private static final String LOCAL_PATH = "";
-	private static final String DEFAULT_INPUT_FILE = LOCAL_PATH + "union_input.csv";
-	private static final String DEFAULT_OUTPUT_FILE = LOCAL_PATH + "union_output.csv";
 
-	private static final boolean LOCAL_SPARK = true;
+	private static final boolean FILE_LOCAL = false;
+	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "union_input.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "union_output.csv";
+
+	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -52,7 +57,7 @@ public class Union {
 
 			if (args.length == 0) {
 				System.out.println("Using default input and output files (Usage: Union <inputFile> <outputFile>)");
-			}else if (args.length == 2) {
+			} else if (args.length == 2) {
 				inputFile = args[0];
 				outputFile = args[1];
 			} else {
@@ -62,12 +67,22 @@ public class Union {
 			System.out.println("inputFile = " + inputFile + ", outputFile = " + outputFile);
 
 			// open the output file
-			Path pt = new Path(outputFile);
-			FileSystem fs = FileSystem.get(new Configuration());
-			br = new BufferedWriter(new OutputStreamWriter(fs.create(pt, true)));
+			if (FILE_LOCAL) {
+				Path pt = new Path(outputFile);
+				FileSystem fs = FileSystem.get(new Configuration());
+				br = new BufferedWriter(new OutputStreamWriter(fs.create(pt, true)));
+			} else {
+				Configuration configuration = new Configuration();
+				FileSystem hdfs = FileSystem.get(new URI(FILE_PATH), configuration);
+				OutputStream out = hdfs.create(new Path(outputFile), new Progressable() {
+					public void progress() {
+					}
+				});
+				br = new BufferedWriter(new OutputStreamWriter(out));
+			}
 
 			// to use local spark or distributed one
-			if (LOCAL_SPARK) {
+			if (SPARK_LOCAL) {
 				sc = new JavaSparkContext("local", "GeometryUnion");
 			} else {
 				sc = new JavaSparkContext(SPARK_MASTER, "GeometryUnion", SPARK_HOME,
