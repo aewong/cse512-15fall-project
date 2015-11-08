@@ -2,6 +2,7 @@ package edu.asu.cse512;
 
 import java.util.Iterator;
 
+import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -23,15 +24,10 @@ public class JTSUtils {
 //		for (int i = 1; i < polygons.length; i++) {
 //			res = res.union(polygons[i]);
 //		}
+		Coordinate c1 = new Coordinate(0.321534855, 0.036295831);
+		Coordinate c2 = new Coordinate(0.321534855, 0.036295831);
+		System.out.println(c1.distance(c2));
 //
-//		System.out.println(res);
-		Geometry g1 = getRectangleFromLeftTopAndRightBottom(0,1,1,0);
-		Geometry g2 = getRectangleFromLeftTopAndRightBottom(1,1,2,0);
-		Geometry g3 = getRectangleFromLeftTopAndRightBottom(2,1,3,0);
-		Geometry g = g1.union(g3);
-		MultiPolygon mp;
-		g = g.union(g2);
-		System.out.println(g);
 	}
 
 	/**
@@ -49,6 +45,20 @@ public class JTSUtils {
 		return factory.createPolygon(ring, null);
 	}
 
+	public static String getBoundingBoxString(Geometry g) {
+		// Envelope() returns a Polygon whose points are (minx, miny), (maxx, miny), (maxx, maxy), (minx, maxy), (minx, miny)
+		g = g.getEnvelope();
+		Coordinate[] coords = g.getCoordinates();
+
+		if (null == coords || coords.length != 5)
+			return null;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("{").append(coords[3].x).append(", ").append(coords[3].y)
+		.append("}, {").append(coords[1].x).append(", ").append(coords[1].y).append("}");
+		return sb.toString();
+	}
+
 	public static Geometry getRectangleFromLeftTopAndRightBottom(String line) {
 		Geometry ret = null;
 		try {
@@ -61,6 +71,30 @@ public class JTSUtils {
 			return null;
 		}
 		return ret;
+	}
+	public static Coordinate getCoordinateFromString(String line) {
+		Coordinate ret = null;
+		try {
+			Double[] doubles = getDoublesFromLine(line);
+			if (null == doubles || doubles.length != 2)
+				throw new Exception("Invalid input format:" + line);
+			
+			ret = new Coordinate(doubles[0], doubles[1]);
+		} catch (Exception e) {
+			return null;
+		}
+		return ret;
+	}
+	
+	public static Geometry getGeometryFromPoint(String line) {
+		Geometry ret = null;
+		try {
+			ret = factory.createPoint(getCoordinateFromString(line));
+		} catch (Exception e) {
+			return null;
+		}
+		return ret;
+		
 	}
 
 	/**

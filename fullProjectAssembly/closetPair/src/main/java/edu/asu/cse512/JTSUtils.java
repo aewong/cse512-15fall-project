@@ -45,6 +45,20 @@ public class JTSUtils {
 		return factory.createPolygon(ring, null);
 	}
 
+	public static String getBoundingBoxString(Geometry g) {
+		// Envelope() returns a Polygon whose points are (minx, miny), (maxx, miny), (maxx, maxy), (minx, maxy), (minx, miny)
+		g = g.getEnvelope();
+		Coordinate[] coords = g.getCoordinates();
+
+		if (null == coords || coords.length != 5)
+			return null;
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("{").append(coords[3].x).append(", ").append(coords[3].y)
+		.append("}, {").append(coords[1].x).append(", ").append(coords[1].y).append("}");
+		return sb.toString();
+	}
+
 	public static Geometry getRectangleFromLeftTopAndRightBottom(String line) {
 		Geometry ret = null;
 		try {

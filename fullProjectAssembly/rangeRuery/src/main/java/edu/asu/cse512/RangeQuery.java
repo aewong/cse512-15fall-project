@@ -22,14 +22,16 @@ import com.vividsolutions.jts.geom.Geometry;
 import scala.Tuple2;
 
 public class RangeQuery {
-	private static final String HDFS_ROOT_PATH = "hdfs://192.168.184.165:54310/";
+	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
 
 	private static final String LOCAL_PATH = "";
-	private static final String DEFAULT_INPUT_FILE1 = LOCAL_PATH + "rangequery_input_1.csv";
-	private static final String DEFAULT_INPUT_FILE2 = LOCAL_PATH + "rangequery_input_2.csv";
-	private static final String DEFAULT_OUTPUT_FILE = LOCAL_PATH + "rangequery_output.csv";
+	private static final boolean FILE_LOCAL = false;
+	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "rangequery_input_1.csv";
+	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "rangequery_input_2.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "rangequery_output.csv";
 
-	private static final boolean LOCAL_SPARK = true;
+	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_APP_NAME = "RangeQuery";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
@@ -72,13 +74,23 @@ public class RangeQuery {
 					"inputFile1 = " + inputFile1 + ", inputFile2 = " + inputFile2 + ", outputFile = " + outputFile);
 
 			// open the output file
-			Path pt = new Path(outputFile);
-			FileSystem fs = FileSystem.get(new Configuration());
-			bw = new BufferedWriter(new OutputStreamWriter(fs.create(pt, true)));
+			if (FILE_LOCAL) {
+				Path pt = new Path(outputFile);
+				FileSystem fs = FileSystem.get(new Configuration());
+				bw = new BufferedWriter(new OutputStreamWriter(fs.create(pt, true)));
+			} else {
+				Configuration configuration = new Configuration();
+				FileSystem hdfs = FileSystem.get(new URI(FILE_PATH), configuration);
+				OutputStream out = hdfs.create(new Path(outputFile), new Progressable() {
+					public void progress() {
+					}
+				});
+				bw = new BufferedWriter(new OutputStreamWriter(out));
+			}
 
 			// to use local spark or distributed one
-			if (LOCAL_SPARK) {
-				sc = new JavaSparkContext("local", SPARK_APP_NAME);
+			if (SPARK_LOCAL) {
+				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
 			} else {
 				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
 						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });

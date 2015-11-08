@@ -32,6 +32,7 @@ public class Union {
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "union_output.csv";
 
 	private static final boolean SPARK_LOCAL = true;
+	private static final String SPARK_APP_NAME = "Union";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -45,23 +46,23 @@ public class Union {
 	 */
 	public static void main(String[] args) {
 		JavaSparkContext sc = null;
-		BufferedWriter br = null;
+		BufferedWriter bw = null;
 
 		try {
 
-			System.out.println("Geometry Union Starts");
+			System.out.println(SPARK_APP_NAME + " Starts");
 
 			// set the input and output file
 			String inputFile = DEFAULT_INPUT_FILE;
 			String outputFile = DEFAULT_OUTPUT_FILE;
 
 			if (args.length == 0) {
-				System.out.println("Using default input and output files (Usage: Union <inputFile> <outputFile>)");
+				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME + " <inputFile> <outputFile>)");
 			} else if (args.length == 2) {
 				inputFile = args[0];
 				outputFile = args[1];
 			} else {
-				System.out.println("Usage: Union <inputFile> <outputFile>");
+				System.out.println("Usage: " + SPARK_APP_NAME + " <inputFile> <outputFile>");
 				return;
 			}
 			System.out.println("inputFile = " + inputFile + ", outputFile = " + outputFile);
@@ -70,7 +71,7 @@ public class Union {
 			if (FILE_LOCAL) {
 				Path pt = new Path(outputFile);
 				FileSystem fs = FileSystem.get(new Configuration());
-				br = new BufferedWriter(new OutputStreamWriter(fs.create(pt, true)));
+				bw = new BufferedWriter(new OutputStreamWriter(fs.create(pt, true)));
 			} else {
 				Configuration configuration = new Configuration();
 				FileSystem hdfs = FileSystem.get(new URI(FILE_PATH), configuration);
@@ -78,14 +79,14 @@ public class Union {
 					public void progress() {
 					}
 				});
-				br = new BufferedWriter(new OutputStreamWriter(out));
+				bw = new BufferedWriter(new OutputStreamWriter(out));
 			}
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-				sc = new JavaSparkContext("local", "GeometryUnion");
+				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
 			} else {
-				sc = new JavaSparkContext(SPARK_MASTER, "GeometryUnion", SPARK_HOME,
+				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
 						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
 			}
 
@@ -113,15 +114,15 @@ public class Union {
 
 			// Output your result, you need to sort your result!!!
 			for (Coordinate cor : finalPolygon.getCoordinates()) {
-				br.write(cor.x + ", " + cor.y + "\n");
+				bw.write(cor.x + ", " + cor.y + "\n");
 				System.out.println(cor.x + ", " + cor.y);
 			}
-			br.flush();
+			bw.flush();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			IOUtils.closeStream(br);
+			IOUtils.closeStream(bw);
 			if (null != sc)
 				sc.close();
 		}
