@@ -1,8 +1,10 @@
-diff -q UnionQueryResult.csv UnionQueryOutput.csv 
-diff -q ConvexHullOutput.csv ConvexHullResult.csv 
-diff -q FarthestPairOutput.csv FarthestPairResult.csv 
-diff -q ClosestPairOutput.csv ClosestPairResult.csv 
-diff -q RangeQueryResult.csv RangeQueryOutput.csv 
-diff -q JoinQueryRectangleResult.csv JoinQueryOutput.csv 
-diff -q JoinQueryPointResult.csv JoinQueryOutput.csv 
+OUTPUT_PATH="../output"
+
+diff -q UnionQueryResult.csv $OUTPUT_PATH/UnionQueryOutput.csv
+diff -q ConvexHullResult.csv $OUTPUT_PATH/ConvexHullOutput.csv
+diff -q FarthestPairResult.csv $OUTPUT_PATH/FarthestPairOutput.csv
+diff -q ClosestPairResult.csv $OUTPUT_PATH/ClosestPairOutput.csv
+diff -q RangeQueryResult.csv $OUTPUT_PATH/RangeQueryOutput.csv
+diff -q JoinQueryRectangleResult.csv $OUTPUT_PATH/JoinQueryOutput.csv
+diff -q JoinQueryPointResult.csv $OUTPUT_PATH/JoinQueryOutput.csv
 
