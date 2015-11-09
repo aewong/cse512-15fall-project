@@ -18,7 +18,3 @@ do
 	echo "copying ${file##*/}"
 	$HADOOP_HOME/bin/hdfs dfs -put $file $HDFS_PATH/${file##*/}
 done
-
-
-
-

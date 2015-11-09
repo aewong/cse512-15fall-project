@@ -40,3 +40,5 @@ local.properties
 
 #crc
 *.crc
+
+*Output.csv

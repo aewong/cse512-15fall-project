@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,9 +33,9 @@ public class Join {
 	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
 
 	private static final String LOCAL_PATH = "";
-	private static final boolean FILE_LOCAL = false;
+	private static final boolean FILE_LOCAL = true;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "JoinQueryInput1.csv";
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "JoinQueryInput3.csv";
 	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "JoinQueryInput2.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "JoinQueryOutput.csv";
 
@@ -103,7 +104,7 @@ public class Join {
 						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
 			}
 
-			JavaRDD<String> lines1 = sc.textFile(inputFile1); // polygons
+			JavaRDD<String> lines1 = sc.textFile(inputFile1); // polygons or points
 			JavaRDD<String> lines2 = sc.textFile(inputFile2); // query windows
 			
 			JavaPairRDD<String, Geometry> idpoly1= lines1.mapToPair(new PairFunction<String, String, Geometry>() {
@@ -160,7 +161,13 @@ public class Join {
 				Collections.sort(values);
 				StringBuilder sb = new StringBuilder();
 				sb.append(key).append(",");
-				sb.append(values);
+				Integer num;
+				for (Iterator<Integer> it = values.iterator(); it.hasNext();) {
+					num = it.next();
+					sb.append(num);
+					if (it.hasNext())
+						sb.append(",");
+				}
 				System.out.println(sb.toString());
 				bw.write(sb.toString() + "\n");
 			}

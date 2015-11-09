@@ -135,7 +135,6 @@ public class RangeQuery {
 			List<Integer> result = ids.collect();
 			Collections.sort(result);
 
-			// Output your result, you need to sort your result!!!
 			for (Integer id : result) {
 				System.out.println(id);
 				bw.write(id+"\n");
