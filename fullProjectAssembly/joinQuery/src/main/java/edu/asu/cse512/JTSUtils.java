@@ -1,6 +1,10 @@
 package edu.asu.cse512;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -14,26 +18,6 @@ public class JTSUtils {
 	private static GeometryFactory factory = new GeometryFactory();
 
 	public static void main(String[] args) {
-		// Geometry[] polygons = new Geometry[5];
-		// polygons[0] = getRectangleFromLeftTopAndRightBottom(0.321534855,
-		// 0.036295831, -0.23567288, -0.415640992);
-		// polygons[1] = getRectangleFromLeftTopAndRightBottom(0.115064798,
-		// 0.105952147, -0.161920957, -0.405533972);
-		// polygons[2] = getRectangleFromLeftTopAndRightBottom(0.238709092,
-		// 0.016298271, -0.331934184, -0.18218141);
-		// polygons[3] = getRectangleFromLeftTopAndRightBottom(0.2069243,
-		// 0.223297076, -0.050542958, -0.475492946);
-		// polygons[4] = getRectangleFromLeftTopAndRightBottom(0.321534855,
-		// 0.036295831, -0.440428957, -0.289485599);
-		//
-		// Geometry res = polygons[0];
-		// for (int i = 1; i < polygons.length; i++) {
-		// res = res.union(polygons[i]);
-		// }
-		Coordinate c1 = new Coordinate(0.321534855, 0.036295831);
-		Coordinate c2 = new Coordinate(0.321534855, 0.036295831);
-		System.out.println(c1.distance(c2));
-		//
 	}
 
 	/**
@@ -182,12 +166,35 @@ public class JTSUtils {
 		Double x1 = Double.parseDouble(strs[1]);
 		Double y1 = Double.parseDouble(strs[2]);
 		if (strs.length == 3) { // point
-			g =factory.createPoint(new Coordinate(x1,y1)); 
+			g = factory.createPoint(new Coordinate(x1, y1));
 		} else { // rectangle
 			Double x2 = Double.parseDouble(strs[3]);
 			Double y2 = Double.parseDouble(strs[4]);
 			g = getRectangleFromLeftTopAndRightBottom(x1, y1, x2, y2);
 		}
 		return new Tuple2<String, Geometry>(id, g);
+	}
+
+	// LAME DESIGN, the requirement needs to sort the coordinates, and remove
+	// the connecting point
+	public static List<Coordinate> convertGeometryToSortedCoordinates(Geometry g) {
+		List<Coordinate> coords = Arrays.asList(g.getCoordinates());
+
+		if (coords.size() <= 1)
+			return coords;
+
+		if (coords.get(0).equals2D(coords.get(coords.size() - 1)))
+			coords = coords.subList(0, coords.size() - 1);
+
+		Collections.sort(coords, new Comparator<Coordinate>() {
+			public int compare(Coordinate c1, Coordinate c2) {
+				if (c1.x == c2.x) {
+					return (c1.y == c2.y) ? 0 : ((c1.y - c2.y > 0) ? 1 : -1);
+				} else {
+					return (c1.x - c2.x > 0) ? 1 : -1;
+				}
+			}
+		});
+		return coords;
 	}
 }
