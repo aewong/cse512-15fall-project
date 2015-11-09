@@ -1,13 +1,20 @@
 package edu.asu.cse512;
 
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -26,8 +33,8 @@ public class FarthestPair {
 	private static final String LOCAL_PATH = "";
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "farthestpair_input.csv";
-	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "farthestpair_output.csv";
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "FarthestPairTestData.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "FarthestPairOutput.csv";
 
 	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_APP_NAME = "FarthestPair";
@@ -131,17 +138,29 @@ public class FarthestPair {
 
 			});
 
-			// Output your result, you need to sort your result!!!
-			System.out.println(farthestPair.p0.x + ", " + farthestPair.p0.y);
-			System.out.println(farthestPair.p1.x + ", " + farthestPair.p1.y);
-			bw.write(farthestPair.p0.x + ", " + farthestPair.p0.y + "\n");
-			bw.write(farthestPair.p1.x + ", " + farthestPair.p1.y + "\n");
-			br.flush();
+			List<Coordinate> line = new ArrayList<Coordinate>();
+			line.add(farthestPair.p0);
+			line.add(farthestPair.p1);
+			Collections.sort(line, new Comparator<Coordinate>() {
+				public int compare(Coordinate c1, Coordinate c2) {
+					if (c1.x==c2.x) {
+						return (c1.y == c2.y)?0:((c1.y-c2.y>0)?1:-1);
+					} else {
+						return (c1.x-c2.x>0)?1:-1;
+					}
+				}
+			});
 
+			// Output your result, you need to sort your result!!!
+			for (Coordinate c : line) {
+				bw.write(c.x + ", " + c.y + "\n");
+				System.out.println(c.x + ", " + c.y);
+			}
+			bw.flush();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			IOUtils.closeStream(br);
+			IOUtils.closeStream(bw);
 			if (null != sc)
 				sc.close();
 		}

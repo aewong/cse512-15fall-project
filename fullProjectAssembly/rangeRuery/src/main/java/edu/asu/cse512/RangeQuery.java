@@ -1,23 +1,25 @@
 package edu.asu.cse512;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 import scala.Tuple2;
 
@@ -27,9 +29,9 @@ public class RangeQuery {
 	private static final String LOCAL_PATH = "";
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "rangequery_input_1.csv";
-	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "rangequery_input_2.csv";
-	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "rangequery_output.csv";
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "RangeQueryTestData.csv";
+	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "RangeQueryRectangle.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "RangeQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_APP_NAME = "RangeQuery";
@@ -98,12 +100,11 @@ public class RangeQuery {
 
 			// Read input points
 			JavaRDD<String> lines = sc.textFile(inputFile1);
-
-			JavaRDD<Geometry> polygons = lines.map(new Function<String, Geometry>() {
-				private static final long serialVersionUID = 1L;
-
-				public Geometry call(String s) {
-					return JTSUtils.getRectangleFromLeftTopAndRightBottom(s);
+			
+			JavaPairRDD<String, Point> idpoints= lines.mapToPair(new PairFunction<String, String, Point>() {
+				private static final long serialVersionUID = 5064721835378357189L;
+				public Tuple2<String, Point> call(String line) throws Exception {
+					return JTSUtils.getIdPointFromString(line);
 				}
 			});
 
@@ -115,22 +116,29 @@ public class RangeQuery {
 			}
 			final Geometry window = JTSUtils.getRectangleFromLeftTopAndRightBottom(strs.get(0));
 
-			polygons = polygons.filter(new Function<Geometry, Boolean>() {
-				private static final long serialVersionUID = 4704248633585265871L;
+			idpoints = idpoints.filter(new Function<Tuple2<String, Point>, Boolean>() {
+				private static final long serialVersionUID = -1230587948991657811L;
 
-				public Boolean call(Geometry g) throws Exception {
-					return window.intersects(g);
+				public Boolean call(Tuple2<String, Point> t) throws Exception {
+					return window.intersects(t._2);
 				}
-				
+			});
+			
+			JavaRDD<Integer> ids = idpoints.map(new Function<Tuple2<String, Point>, Integer>() {
+				private static final long serialVersionUID = -2797763495076035001L;
+
+				public Integer call(Tuple2<String, Point> t) throws Exception {
+					return Integer.parseInt(t._1);
+				}
 			});
 
-			List<Geometry> result = polygons.collect();
+			List<Integer> result = ids.collect();
+			Collections.sort(result);
 
 			// Output your result, you need to sort your result!!!
-			for (Geometry g : result) {
-				String s = JTSUtils.getBoundingBoxString(g)+"\n";
-				System.out.println(s);
-				bw.write(s);
+			for (Integer id : result) {
+				System.out.println(id);
+				bw.write(id+"\n");
 			}
 
 			bw.flush();

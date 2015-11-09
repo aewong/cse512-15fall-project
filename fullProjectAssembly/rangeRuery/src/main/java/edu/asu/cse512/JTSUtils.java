@@ -2,12 +2,13 @@ package edu.asu.cse512;
 
 import java.util.Iterator;
 
-import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+
+import scala.Tuple2;
 
 public class JTSUtils {
 	private static GeometryFactory factory = new GeometryFactory();
@@ -148,5 +149,22 @@ public class JTSUtils {
 		}
 		return ret;
 
+	}
+
+	public static Tuple2<String, Point> getIdPointFromString(String line) {
+		String[] strs = line.split(",");
+		String id = strs[0];
+		Double x = Double.parseDouble(strs[1]);
+		Double y = Double.parseDouble(strs[2]);
+		Point p = factory.createPoint(new Coordinate(x,y));
+		return new Tuple2<String, Point>(id, p);
+	}
+	
+	public static Tuple2<String, Coordinate> getIdCoordinateFromString(String line) {
+		String[] strs = line.split(",");
+		String id = strs[0];
+		Double x = Double.parseDouble(strs[1]);
+		Double y = Double.parseDouble(strs[2]);
+		return new Tuple2<String, Coordinate>(id, new Coordinate(x,y));
 	}
 }

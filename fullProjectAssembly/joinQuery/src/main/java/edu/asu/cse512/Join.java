@@ -1,18 +1,23 @@
 package edu.asu.cse512;
 
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -29,9 +34,9 @@ public class Join {
 	private static final String LOCAL_PATH = "";
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "join_input_1.csv";
-	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "join_input_2.csv";
-	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "join_output.csv";
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "JoinQueryInput1.csv";
+	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "JoinQueryInput2.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "JoinQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_APP_NAME = "Join";
@@ -98,62 +103,64 @@ public class Join {
 						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
 			}
 
-			JavaRDD<String> lines1 = sc.textFile(inputFile1); // file1 is the index in the output file
-			JavaRDD<String> lines2 = sc.textFile(inputFile2); 
+			JavaRDD<String> lines1 = sc.textFile(inputFile1); // polygons
+			JavaRDD<String> lines2 = sc.textFile(inputFile2); // query windows
 			
-			System.out.println(lines2.collect());
-
-			JavaRDD<Geometry> polygons1 = lines1.map(new Function<String, Geometry>() {
-				private static final long serialVersionUID = -3575879335450999899L;
-
-				public Geometry call(String s) {
-					return JTSUtils.getRectangleFromLeftTopAndRightBottom(s);
+			JavaPairRDD<String, Geometry> idpoly1= lines1.mapToPair(new PairFunction<String, String, Geometry>() {
+				private static final long serialVersionUID = 5064721835378357189L;
+				public Tuple2<String, Geometry> call(String line) throws Exception {
+					return JTSUtils.getIdGeometryFromString(line);
 				}
 			});
 
-			JavaRDD<Geometry> polygons2= lines2.map(new Function<String, Geometry>() {
-				private static final long serialVersionUID = -1088607376402284643L;
-
-				public Geometry call(String s) {
-					return JTSUtils.getRectangleFromLeftTopAndRightBottom(s);
+			JavaPairRDD<String, Geometry> idpoly2= lines2.mapToPair(new PairFunction<String, String, Geometry>() {
+				private static final long serialVersionUID = 5064721835378357999L;
+				public Tuple2<String, Geometry> call(String line) throws Exception {
+					return JTSUtils.getIdGeometryFromString(line);
 				}
 			});
 
-			
-			JavaPairRDD<Geometry, Geometry> pairs = polygons2.cartesian(polygons1);
 
-			pairs = pairs.filter(new Function<Tuple2<Geometry, Geometry>, Boolean>() {
+			JavaPairRDD<Tuple2<String, Geometry>, Tuple2<String, Geometry>> pairs = idpoly2.cartesian(idpoly1);
+
+			pairs = pairs.filter(new Function<Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>>, Boolean>() {
 				private static final long serialVersionUID = -9132236068978817563L;
 
-				public Boolean call(Tuple2<Geometry, Geometry> t) throws Exception {
-					return t._1.intersects(t._2);
+				public Boolean call(Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>> t) throws Exception {
+					Geometry g1 = t._1._2;
+					Geometry g2 = t._2._2;
+					return g1.intersects(g2) || g1.contains(g2) || g2.contains(g1);
+				}
+			});
+			
+			JavaPairRDD<Integer, Integer> idPairs = pairs.mapToPair(new PairFunction<Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>>, Integer, Integer>() {
+				public Tuple2<Integer, Integer> call(Tuple2<Tuple2<String, Geometry> , Tuple2<String, Geometry>> t)
+						throws Exception {
+					return new Tuple2<Integer, Integer>(Integer.parseInt(t._1._1), Integer.parseInt(t._2._1));
 				}
 				
 			});
 			
-			// NOTE, in JTS, two geometry objects were only equal if they were in fact the same geometry object.
-			// Use string presentation to remove duplicate if they are the same shape
-			JavaPairRDD<String, Geometry> strPairs = pairs.mapToPair(new PairFunction<Tuple2<Geometry, Geometry>, String, Geometry>() {
-				private static final long serialVersionUID = -8030017184012909270L;
-				public Tuple2<String, Geometry> call(Tuple2<Geometry, Geometry> t) throws Exception {
-					String s = JTSUtils.getBoundingBoxString(t._1);
-					return new Tuple2<String, Geometry>(s, t._2);
+			Map<Integer, Iterable<Integer>> result = idPairs.groupByKey().collectAsMap();
+			List<Tuple2<Integer, Iterable<Integer>>> resultList = new ArrayList<Tuple2<Integer, Iterable<Integer>>>();
+			for (Entry<Integer , Iterable<Integer>> entry : result.entrySet()) {
+				Tuple2<Integer, Iterable<Integer>> item = new Tuple2<Integer, Iterable<Integer>>(entry.getKey(), entry.getValue());
+				resultList.add(item);
+			}
+			
+			Collections.sort(resultList, new Comparator<Tuple2<Integer, Iterable<Integer>>>() {
+				public int compare(Tuple2<Integer, Iterable<Integer>> t1, Tuple2<Integer, Iterable<Integer>> t2) {
+					return t1._1 - t2._1;
 				}
 			});
-			
-			Map<String, Iterable<Geometry>> result = strPairs.groupByKey().collectAsMap();
-			for (Entry<String , Iterable<Geometry>> entry : result.entrySet()) {
-				Iterator<Geometry> it = entry.getValue().iterator();
-				String key = entry.getKey();
+
+			for (Tuple2<Integer , Iterable<Integer>> entry : resultList) {
+				Integer key = entry._1;
+				List<Integer> values = IteratorUtils.toList(entry._2.iterator());
+				Collections.sort(values);
 				StringBuilder sb = new StringBuilder();
-				sb.append(key).append(" : ");
-				sb.append("{");
-				while(it.hasNext()) {
-					Geometry g = it.next();
-					sb.append(JTSUtils.getBoundingBoxString(g));
-					if (it.hasNext()) sb.append(" # ");
-				}
-				sb.append("}");
+				sb.append(key).append(",");
+				sb.append(values);
 				System.out.println(sb.toString());
 				bw.write(sb.toString() + "\n");
 			}
