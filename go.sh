@@ -1,6 +1,6 @@
-rm ./fullProjectAssembly/rangeRuery/RangeQueryRectangle.csv
-rm ./fullProjectAssembly/rangeRuery/RangeQueryResult.csv
-rm ./fullProjectAssembly/rangeRuery/RangeQueryTestData.csv
+rm ./fullProjectAssembly/rangeQuery/RangeQueryRectangle.csv
+rm ./fullProjectAssembly/rangeQuery/RangeQueryResult.csv
+rm ./fullProjectAssembly/rangeQuery/RangeQueryTestData.csv
 rm ./fullProjectAssembly/union/UnionQueryResult.csv
 rm ./fullProjectAssembly/union/UnionQueryTestData.csv
 rm ./fullProjectAssembly/convexHull/ConvexHullResult.csv
@@ -12,6 +12,6 @@ rm ./fullProjectAssembly/joinQuery/JoinQueryInput1.csv
 rm ./fullProjectAssembly/joinQuery/JoinQueryPointResult.csv
 rm ./fullProjectAssembly/joinQuery/JoinQueryInput2.csv
 rm ./fullProjectAssembly/joinQuery/JoinQueryInput3.csv
-rm ./fullProjectAssembly/closetPair/ClosestPairResult.csv
-rm ./fullProjectAssembly/closetPair/ClosestPairTestData.csv
+rm ./fullProjectAssembly/closestPair/ClosestPairResult.csv
+rm ./fullProjectAssembly/closestPair/ClosestPairTestData.csv
 

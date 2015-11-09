@@ -36,7 +36,7 @@ public class FarthestPair {
 	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "FarthestPairTestData.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "FarthestPairOutput.csv";
 
-	private static final boolean SPARK_LOCAL = true;
+	private static final boolean SPARK_LOCAL = false;
 	private static final String SPARK_APP_NAME = "FarthestPair";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
@@ -92,7 +92,7 @@ public class FarthestPair {
 				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
 			} else {
 				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
+						new String[] { "target/farthestPair-0.1.jar", "../lib/jts-1.8.jar" });
 			}
 
 			// Read input points

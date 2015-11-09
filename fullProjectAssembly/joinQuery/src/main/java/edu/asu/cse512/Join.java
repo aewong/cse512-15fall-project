@@ -39,8 +39,8 @@ public class Join {
 	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "JoinQueryInput2.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "JoinQueryOutput.csv";
 
-	private static final boolean SPARK_LOCAL = true;
-	private static final String SPARK_APP_NAME = "Join";
+	private static final boolean SPARK_LOCAL = false;
+	private static final String SPARK_APP_NAME = "JoinQuery";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -101,7 +101,7 @@ public class Join {
 				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
 			} else {
 				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
+						new String[] { "target/joinQuery-0.1.jar", "../lib/jts-1.8.jar" });
 			}
 
 			JavaRDD<String> lines1 = sc.textFile(inputFile1); // polygons or points

@@ -23,20 +23,16 @@ import org.apache.spark.api.java.function.Function2;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
-/**
- * Hello world!
- *
- */
 public class Union {
 	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
 	private static final String LOCAL_PATH = "";
 
-	private static final boolean FILE_LOCAL = true;
+	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
 	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "UnionQueryTestData.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "UnionQueryOutput.csv";
 
-	private static final boolean SPARK_LOCAL = true;
+	private static final boolean SPARK_LOCAL = false;
 	private static final String SPARK_APP_NAME = "Union";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
@@ -94,7 +90,7 @@ public class Union {
 				sc = new JavaSparkContext(conf); 
 			} else {
 				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/union-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
+						new String[] { "target/union-0.1.jar", "../lib/jts-1.8.jar" });
 			}
 
 			// 1. read the lines from the input file in HDFS
