@@ -26,4 +26,4 @@ cp -r fullProjectAssembly/ $SUBMIT_PATH/$GROUP_PATH/
 
 # zip it
 cd $SUBMIT_PATH
-zip -r $GROUP_PATH.zip *
+zip -r ../$GROUP_PATH.zip *
