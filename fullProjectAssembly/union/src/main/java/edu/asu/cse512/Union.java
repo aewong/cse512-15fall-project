@@ -4,6 +4,10 @@ import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -28,8 +32,8 @@ public class Union {
 
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "union_input.csv";
-	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "union_output.csv";
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "UnionQueryTestData.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "UnionQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_APP_NAME = "Union";
@@ -111,9 +115,12 @@ public class Union {
 					return arg0.union(arg1);
 				}
 			});
+			
+			// convert to the format required by TA
+			List<Coordinate> coords = JTSUtils.convertGeometryToSortedCoordinates(finalPolygon);
 
 			// Output your result, you need to sort your result!!!
-			for (Coordinate cor : finalPolygon.getCoordinates()) {
+			for (Coordinate cor : coords) {
 				bw.write(cor.x + ", " + cor.y + "\n");
 				System.out.println(cor.x + ", " + cor.y);
 			}

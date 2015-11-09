@@ -1,13 +1,15 @@
 package edu.asu.cse512;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
-import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiPolygon;
 
 public class JTSUtils {
 	private static GeometryFactory factory = new GeometryFactory();
@@ -148,5 +150,26 @@ public class JTSUtils {
 		}
 		return ret;
 
+	}
+	
+	//LAME DESIGN, the requirement needs to sort the coordinates, and remove the connecting point
+	public static List<Coordinate> convertGeometryToSortedCoordinates(Geometry g) {
+			List<Coordinate> coords = Arrays.asList(g.getCoordinates());
+
+			if (coords.size() <= 1) return coords;
+			
+			if (coords.get(0).equals2D(coords.get(coords.size()-1)))
+					coords = coords.subList(0, coords.size()-1);
+
+			Collections.sort(coords, new Comparator<Coordinate>() {
+				public int compare(Coordinate c1, Coordinate c2) {
+					if (c1.x==c2.x) {
+						return (c1.y == c2.y)?0:((c1.y-c2.y>0)?1:-1);
+					} else {
+						return (c1.x-c2.x>0)?1:-1;
+					}
+				}
+			});
+			return coords;
 	}
 }

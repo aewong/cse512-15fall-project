@@ -1,11 +1,16 @@
 package edu.asu.cse512;
 
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.util.Progressable;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
@@ -20,8 +25,8 @@ public class ConvexHull {
 	private static final String LOCAL_PATH = "";
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "convexhull_input.csv";
-	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "convexhull_output.csv";
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "ConvexHullTestData.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "ConvexHullOutput.csv";
 
 	private static final boolean SPARK_LOCAL = true;
 	private static final String SPARK_APP_NAME = "ConvexHull";
@@ -102,18 +107,20 @@ public class ConvexHull {
 					return arg0.union(arg1).convexHull();
 				}
 			});
+			
+			List<Coordinate> coords = JTSUtils.convertGeometryToSortedCoordinates(finalConvexHull);
 
 			// Output your result, you need to sort your result!!!
-			for (Coordinate cor : finalConvexHull.getCoordinates()) {
+			for (Coordinate cor : coords) {
 				bw.write(cor.x + ", " + cor.y + "\n");
 				System.out.println(cor.x + ", " + cor.y);
 			}
-			br.flush();
+			bw.flush();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			IOUtils.closeStream(br);
+			IOUtils.closeStream(bw);
 			if (null != sc)
 				sc.close();
 		}
