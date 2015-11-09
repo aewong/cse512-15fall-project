@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Progressable;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -35,10 +36,10 @@ public class ClosestPair {
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "ClosestPairOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "ClosestPair";
+	private static final String SPARK_APP_NAME = "Group2-ClosestPair";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
-	
+
 	private static final double EPSL = 0.00000001;
 
 	/*
@@ -62,7 +63,8 @@ public class ClosestPair {
 			String outputFile = DEFAULT_OUTPUT_FILE;
 
 			if (args.length == 0) {
-				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME + " <inputFile> <outputFile>)");
+				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME
+						+ " <inputFile> <outputFile>)");
 			} else if (args.length == 2) {
 				inputFile = args[0];
 				outputFile = args[1];
@@ -89,10 +91,16 @@ public class ClosestPair {
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
+				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/closestPair-0.1.jar", "../lib/jts-1.8.jar" });
+				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				// SPARK_HOME,
+				// new String[] { "target/closestPair-0.1.jar",
+				// "../lib/jts-1.8.jar" });
+
+				// code from TA
+				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+				sc = new JavaSparkContext(conf);
 			}
 
 			// Read input points
@@ -111,15 +119,15 @@ public class ClosestPair {
 			JavaPairRDD<Coordinate, Coordinate> pairs = points.cartesian(points);
 
 			// filter pair of the same point
-			pairs = pairs.filter(new Function<Tuple2<Coordinate, Coordinate>, Boolean> () {
+			pairs = pairs.filter(new Function<Tuple2<Coordinate, Coordinate>, Boolean>() {
 				private static final long serialVersionUID = 2869765103096895872L;
 
 				public Boolean call(Tuple2<Coordinate, Coordinate> c) throws Exception {
 					return c._1.distance(c._2) > EPSL;
 				}
-				
+
 			});
-			
+
 			// map to line segments
 			JavaRDD<LineSegment> segments = pairs.map(new Function<Tuple2<Coordinate, Coordinate>, LineSegment>() {
 				private static final long serialVersionUID = 3269060742156351040L;
@@ -128,7 +136,6 @@ public class ClosestPair {
 					return new LineSegment(c._1, c._2);
 				}
 			});
-			
 
 			// reduce to the closest pair
 			LineSegment closestPair = segments.reduce(new Function2<LineSegment, LineSegment, LineSegment>() {
@@ -139,20 +146,19 @@ public class ClosestPair {
 				}
 
 			});
-			
+
 			List<Coordinate> line = new ArrayList<Coordinate>();
 			line.add(closestPair.p0);
 			line.add(closestPair.p1);
 			Collections.sort(line, new Comparator<Coordinate>() {
 				public int compare(Coordinate c1, Coordinate c2) {
-					if (c1.x==c2.x) {
-						return (c1.y == c2.y)?0:((c1.y-c2.y>0)?1:-1);
+					if (c1.x == c2.x) {
+						return (c1.y == c2.y) ? 0 : ((c1.y - c2.y > 0) ? 1 : -1);
 					} else {
-						return (c1.x-c2.x>0)?1:-1;
+						return (c1.x - c2.x > 0) ? 1 : -1;
 					}
 				}
 			});
-
 
 			// Output your result, you need to sort your result!!!
 			for (Coordinate c : line) {
