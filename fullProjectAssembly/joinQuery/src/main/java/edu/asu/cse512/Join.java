@@ -33,9 +33,9 @@ public class Join {
 	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
 
 	private static final String LOCAL_PATH = "";
-	private static final boolean FILE_LOCAL = true;
+	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "JoinQueryInput3.csv";
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "JoinQueryInput1.csv";
 	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "JoinQueryInput2.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "JoinQueryOutput.csv";
 

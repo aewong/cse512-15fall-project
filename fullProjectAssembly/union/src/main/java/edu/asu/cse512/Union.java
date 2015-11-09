@@ -14,6 +14,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Progressable;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
@@ -30,7 +31,7 @@ public class Union {
 	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
 	private static final String LOCAL_PATH = "";
 
-	private static final boolean FILE_LOCAL = false;
+	private static final boolean FILE_LOCAL = true;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
 	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "UnionQueryTestData.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "UnionQueryOutput.csv";
@@ -88,10 +89,12 @@ public class Union {
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
+//				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
+				SparkConf conf = new SparkConf().setAppName("Group2-Union");
+				sc = new JavaSparkContext(conf); 
 			} else {
 				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/d-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
+						new String[] { "target/union-0.1.jar", "lib/jts/lib/jts-1.8.jar" });
 			}
 
 			// 1. read the lines from the input file in HDFS

@@ -112,8 +112,8 @@ public class ConvexHull {
 
 			// Output your result, you need to sort your result!!!
 			for (Coordinate cor : coords) {
-				bw.write(cor.x + ", " + cor.y + "\n");
-				System.out.println(cor.x + ", " + cor.y);
+				bw.write(cor.x + "," + cor.y + "\n");
+				System.out.println(cor.x + "," + cor.y);
 			}
 			bw.flush();
 

@@ -2,14 +2,22 @@ HADOOP_HOME="/home/user/hadoop-2.7.1"
 HDFS_PATH=hdfs://192.168.184.165:54310/
 
 INPUT_FILES="
-fullProjectAssembly/rangeRuery/RangeQueryRectangle.csv
-fullProjectAssembly/rangeRuery/RangeQueryTestData.csv
-fullProjectAssembly/union/UnionQueryTestData.csv
-fullProjectAssembly/convexHull/ConvexHullTestData.csv
-fullProjectAssembly/farthestPair/FarthestPairTestData.csv
-fullProjectAssembly/joinQuery/JoinQueryInput1.csv
-fullProjectAssembly/joinQuery/JoinQueryInput2.csv
-fullProjectAssembly/closetPair/ClosestPairTestData.csv"
+testdata/ClosestPairResult.csv
+testdata/ClosestPairTestData.csv
+testdata/ConvexHullResult.csv
+testdata/ConvexHullTestData.csv
+testdata/FarthestPairResult.csv
+testdata/FarthestPairTestData.csv
+testdata/JoinQueryInput1.csv
+testdata/JoinQueryInput2.csv
+testdata/JoinQueryInput3.csv
+testdata/JoinQueryPointResult.csv
+testdata/JoinQueryRectangleResult.csv
+testdata/RangeQueryRectangle.csv
+testdata/RangeQueryResult.csv
+testdata/RangeQueryTestData.csv
+testdata/UnionQueryResult.csv
+testdata/UnionQueryTestData.csv"
 
 $HADOOP_HOME/bin/hdfs dfs -rm -r $HDFS_PATH/*
 

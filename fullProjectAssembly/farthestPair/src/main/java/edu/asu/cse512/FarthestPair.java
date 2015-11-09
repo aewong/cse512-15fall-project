@@ -153,8 +153,8 @@ public class FarthestPair {
 
 			// Output your result, you need to sort your result!!!
 			for (Coordinate c : line) {
-				bw.write(c.x + ", " + c.y + "\n");
-				System.out.println(c.x + ", " + c.y);
+				bw.write(c.x + "," + c.y + "\n");
+				System.out.println(c.x + "," + c.y);
 			}
 			bw.flush();
 		} catch (Exception e) {
