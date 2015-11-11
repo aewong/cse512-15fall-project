@@ -146,6 +146,7 @@ public class FarthestPair {
 
 			});
 
+			// sort the output points order
 			List<Coordinate> line = new ArrayList<Coordinate>();
 			line.add(farthestPair.p0);
 			line.add(farthestPair.p1);

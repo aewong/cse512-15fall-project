@@ -124,14 +124,16 @@ public class RangeQuery {
 			}
 			final Geometry window = JTSUtils.getRectangleFromLeftTopAndRightBottom(strs.get(0));
 
+			// filter the pairs to get 
 			idpoints = idpoints.filter(new Function<Tuple2<String, Point>, Boolean>() {
 				private static final long serialVersionUID = -1230587948991657811L;
 
 				public Boolean call(Tuple2<String, Point> t) throws Exception {
-					return window.intersects(t._2);
+					return window.intersects(t._2) || window.contains(t._2) || t._2.contains(window);
 				}
 			});
 
+			// get the ids
 			JavaRDD<Integer> ids = idpoints.map(new Function<Tuple2<String, Point>, Integer>() {
 				private static final long serialVersionUID = -2797763495076035001L;
 

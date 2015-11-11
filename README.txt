@@ -11,6 +11,7 @@ Members:
 1. Using JTS library.
 
 2. the main() for each function takes 2 or 3 strings as parameters which define the absolute path to the input and output files.
+(e.g. hdfs://192.168.184.165:54310/UnionTestData.csv hdfs://192.168.184.165:54310/UnionOutput.csv)
 
 3. In each function's source code, there are two boolean variables:
 FILE_LOCAL : use local file system or hdfs

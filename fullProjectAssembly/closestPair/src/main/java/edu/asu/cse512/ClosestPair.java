@@ -147,6 +147,7 @@ public class ClosestPair {
 
 			});
 
+			// sort the output points order
 			List<Coordinate> line = new ArrayList<Coordinate>();
 			line.add(closestPair.p0);
 			line.add(closestPair.p1);

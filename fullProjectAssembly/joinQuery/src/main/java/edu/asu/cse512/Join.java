@@ -110,10 +110,12 @@ public class Join {
 				sc = new JavaSparkContext(conf);
 			}
 
-			JavaRDD<String> lines1 = sc.textFile(inputFile1); // polygons or
-																// points
-			JavaRDD<String> lines2 = sc.textFile(inputFile2); // query windows
+			// polygons or points
+			JavaRDD<String> lines1 = sc.textFile(inputFile1);
+			// query windows
+			JavaRDD<String> lines2 = sc.textFile(inputFile2);
 
+			// make a pair out of a geometry
 			JavaPairRDD<String, Geometry> idpoly1 = lines1.mapToPair(new PairFunction<String, String, Geometry>() {
 				private static final long serialVersionUID = 5064721835378357189L;
 
@@ -132,6 +134,7 @@ public class Join {
 
 			JavaPairRDD<Tuple2<String, Geometry>, Tuple2<String, Geometry>> pairs = idpoly2.cartesian(idpoly1);
 
+			// filter to get the join
 			pairs = pairs.filter(new Function<Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>>, Boolean>() {
 				private static final long serialVersionUID = -9132236068978817563L;
 
@@ -151,6 +154,8 @@ public class Join {
 
 					});
 
+			
+			// output by the index key
 			Map<Integer, Iterable<Integer>> result = idPairs.groupByKey().collectAsMap();
 			List<Tuple2<Integer, Iterable<Integer>>> resultList = new ArrayList<Tuple2<Integer, Iterable<Integer>>>();
 			for (Entry<Integer, Iterable<Integer>> entry : result.entrySet()) {
@@ -159,12 +164,14 @@ public class Join {
 				resultList.add(item);
 			}
 
+			// sort the output
 			Collections.sort(resultList, new Comparator<Tuple2<Integer, Iterable<Integer>>>() {
 				public int compare(Tuple2<Integer, Iterable<Integer>> t1, Tuple2<Integer, Iterable<Integer>> t2) {
 					return t1._1 - t2._1;
 				}
 			});
 
+			// output the lines
 			for (Tuple2<Integer, Iterable<Integer>> entry : resultList) {
 				Integer key = entry._1;
 				List<Integer> values = IteratorUtils.toList(entry._2.iterator());

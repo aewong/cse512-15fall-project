@@ -98,7 +98,7 @@ public class ConvexHull {
 			// Read input points
 			JavaRDD<String> lines = sc.textFile(inputFile);
 
-			// Convert each line of input to array with single coordinate
+			// Convert each line of input to a Geometry
 			JavaRDD<Geometry> convexHulls = lines.map(new Function<String, Geometry>() {
 				private static final long serialVersionUID = 2594771192711015986L;
 
@@ -116,6 +116,7 @@ public class ConvexHull {
 				}
 			});
 
+			// sort the output
 			List<Coordinate> coords = JTSUtils.convertGeometryToSortedCoordinates(finalConvexHull);
 
 			// Output your result, you need to sort your result!!!
