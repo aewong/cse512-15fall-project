@@ -1,10 +1,20 @@
 OUTPUT_PATH="../output"
 
-diff -q UnionQueryResult.csv $OUTPUT_PATH/UnionQueryOutput.csv
-diff -q ConvexHullResult.csv $OUTPUT_PATH/ConvexHullOutput.csv
-diff -q FarthestPairResult.csv $OUTPUT_PATH/FarthestPairOutput.csv
-diff -q ClosestPairResult.csv $OUTPUT_PATH/ClosestPairOutput.csv
-diff -q RangeQueryResult.csv $OUTPUT_PATH/RangeQueryOutput.csv
-diff -q JoinQueryRectangleResult.csv $OUTPUT_PATH/JoinQueryOutput.csv
-diff -q JoinQueryPointResult.csv $OUTPUT_PATH/JoinQueryOutput.csv
+FILE_PREFIX="
+UnionQuery
+ConvexHull
+FarthestPair
+ClosestPair
+RangeQuery
+JoinQueryRectangle
+JoinQueryPoint"
 
+RESULT_SURFIX="Result.csv"
+OUTPUT_SURFIX="Output.csv"
+
+for prefix in $FILE_PREFIX
+	do diff -q $prefix$RESULT_SURFIX $OUTPUT_PATH/$prefix$OUTPUT_SURFIX
+        if [ $? == 0 ]; then
+           echo $prefix passed
+        fi
+done

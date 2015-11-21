@@ -15,6 +15,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Progressable;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -37,7 +38,7 @@ public class FarthestPair {
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "FarthestPairOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "FarthestPair";
+	private static final String SPARK_APP_NAME = "Group2-FarthestPair";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -62,7 +63,8 @@ public class FarthestPair {
 			String outputFile = DEFAULT_OUTPUT_FILE;
 
 			if (args.length == 0) {
-				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME + " <inputFile> <outputFile>)");
+				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME
+						+ " <inputFile> <outputFile>)");
 			} else if (args.length == 2) {
 				inputFile = args[0];
 				outputFile = args[1];
@@ -89,10 +91,16 @@ public class FarthestPair {
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
+				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/farthestPair-0.1.jar", "../lib/jts-1.8.jar" });
+				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				// SPARK_HOME,
+				// new String[] { "target/farthestPair-0.1.jar",
+				// "../lib/jts-1.8.jar" });
+
+				// code from TA
+				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+				sc = new JavaSparkContext(conf);
 			}
 
 			// Read input points
@@ -138,15 +146,16 @@ public class FarthestPair {
 
 			});
 
+			// sort the output points order
 			List<Coordinate> line = new ArrayList<Coordinate>();
 			line.add(farthestPair.p0);
 			line.add(farthestPair.p1);
 			Collections.sort(line, new Comparator<Coordinate>() {
 				public int compare(Coordinate c1, Coordinate c2) {
-					if (c1.x==c2.x) {
-						return (c1.y == c2.y)?0:((c1.y-c2.y>0)?1:-1);
+					if (c1.x == c2.x) {
+						return (c1.y == c2.y) ? 0 : ((c1.y - c2.y > 0) ? 1 : -1);
 					} else {
-						return (c1.x-c2.x>0)?1:-1;
+						return (c1.x - c2.x > 0) ? 1 : -1;
 					}
 				}
 			});

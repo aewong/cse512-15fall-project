@@ -10,6 +10,7 @@ tmp/
 local.properties
 .settings/
 .loadpath
+*.*~
 
 # Eclipse Core
 .project
@@ -42,3 +43,4 @@ local.properties
 *.crc
 
 *Output.csv
+submit/

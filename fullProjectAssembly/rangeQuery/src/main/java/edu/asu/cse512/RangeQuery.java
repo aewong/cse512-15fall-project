@@ -12,6 +12,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Progressable;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -34,7 +35,7 @@ public class RangeQuery {
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "RangeQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "RangeQuery";
+	private static final String SPARK_APP_NAME = "Group2-RangeQuery";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -92,17 +93,24 @@ public class RangeQuery {
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
+				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/rangeQuery-0.1.jar", "../lib/jts-1.8.jar" });
+				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				// SPARK_HOME,
+				// new String[] { "target/rangeQuery-0.1.jar",
+				// "../lib/jts-1.8.jar" });
+
+				// code from TA
+				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+				sc = new JavaSparkContext(conf);
 			}
 
 			// Read input points
 			JavaRDD<String> lines = sc.textFile(inputFile1);
-			
-			JavaPairRDD<String, Point> idpoints= lines.mapToPair(new PairFunction<String, String, Point>() {
+
+			JavaPairRDD<String, Point> idpoints = lines.mapToPair(new PairFunction<String, String, Point>() {
 				private static final long serialVersionUID = 5064721835378357189L;
+
 				public Tuple2<String, Point> call(String line) throws Exception {
 					return JTSUtils.getIdPointFromString(line);
 				}
@@ -116,14 +124,16 @@ public class RangeQuery {
 			}
 			final Geometry window = JTSUtils.getRectangleFromLeftTopAndRightBottom(strs.get(0));
 
+			// filter the pairs to get 
 			idpoints = idpoints.filter(new Function<Tuple2<String, Point>, Boolean>() {
 				private static final long serialVersionUID = -1230587948991657811L;
 
 				public Boolean call(Tuple2<String, Point> t) throws Exception {
-					return window.intersects(t._2);
+					return window.intersects(t._2) || window.contains(t._2) || t._2.contains(window);
 				}
 			});
-			
+
+			// get the ids
 			JavaRDD<Integer> ids = idpoints.map(new Function<Tuple2<String, Point>, Integer>() {
 				private static final long serialVersionUID = -2797763495076035001L;
 
@@ -137,7 +147,7 @@ public class RangeQuery {
 
 			for (Integer id : result) {
 				System.out.println(id);
-				bw.write(id+"\n");
+				bw.write(id + "\n");
 			}
 
 			bw.flush();

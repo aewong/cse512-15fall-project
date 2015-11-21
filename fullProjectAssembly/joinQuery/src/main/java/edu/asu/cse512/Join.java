@@ -5,7 +5,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -19,6 +18,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Progressable;
+import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -40,7 +40,7 @@ public class Join {
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "JoinQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "JoinQuery";
+	private static final String SPARK_APP_NAME = "Group2-JoinQuery";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -98,32 +98,43 @@ public class Join {
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
+				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/joinQuery-0.1.jar", "../lib/jts-1.8.jar" });
+				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				// SPARK_HOME,
+				// new String[] { "target/joinQuery-0.1.jar",
+				// "../lib/jts-1.8.jar" });
+
+				// code from TA
+				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+				sc = new JavaSparkContext(conf);
 			}
 
-			JavaRDD<String> lines1 = sc.textFile(inputFile1); // polygons or points
-			JavaRDD<String> lines2 = sc.textFile(inputFile2); // query windows
-			
-			JavaPairRDD<String, Geometry> idpoly1= lines1.mapToPair(new PairFunction<String, String, Geometry>() {
+			// polygons or points
+			JavaRDD<String> lines1 = sc.textFile(inputFile1);
+			// query windows
+			JavaRDD<String> lines2 = sc.textFile(inputFile2);
+
+			// make a pair out of a geometry
+			JavaPairRDD<String, Geometry> idpoly1 = lines1.mapToPair(new PairFunction<String, String, Geometry>() {
 				private static final long serialVersionUID = 5064721835378357189L;
+
 				public Tuple2<String, Geometry> call(String line) throws Exception {
 					return JTSUtils.getIdGeometryFromString(line);
 				}
 			});
 
-			JavaPairRDD<String, Geometry> idpoly2= lines2.mapToPair(new PairFunction<String, String, Geometry>() {
+			JavaPairRDD<String, Geometry> idpoly2 = lines2.mapToPair(new PairFunction<String, String, Geometry>() {
 				private static final long serialVersionUID = 5064721835378357999L;
+
 				public Tuple2<String, Geometry> call(String line) throws Exception {
 					return JTSUtils.getIdGeometryFromString(line);
 				}
 			});
-
 
 			JavaPairRDD<Tuple2<String, Geometry>, Tuple2<String, Geometry>> pairs = idpoly2.cartesian(idpoly1);
 
+			// filter to get the join
 			pairs = pairs.filter(new Function<Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>>, Boolean>() {
 				private static final long serialVersionUID = -9132236068978817563L;
 
@@ -133,29 +144,35 @@ public class Join {
 					return g1.intersects(g2) || g1.contains(g2) || g2.contains(g1);
 				}
 			});
+
+			JavaPairRDD<Integer, Integer> idPairs = pairs.mapToPair(
+					new PairFunction<Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>>, Integer, Integer>() {
+						public Tuple2<Integer, Integer> call(
+								Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>> t) throws Exception {
+							return new Tuple2<Integer, Integer>(Integer.parseInt(t._1._1), Integer.parseInt(t._2._1));
+						}
+
+					});
+
 			
-			JavaPairRDD<Integer, Integer> idPairs = pairs.mapToPair(new PairFunction<Tuple2<Tuple2<String, Geometry>, Tuple2<String, Geometry>>, Integer, Integer>() {
-				public Tuple2<Integer, Integer> call(Tuple2<Tuple2<String, Geometry> , Tuple2<String, Geometry>> t)
-						throws Exception {
-					return new Tuple2<Integer, Integer>(Integer.parseInt(t._1._1), Integer.parseInt(t._2._1));
-				}
-				
-			});
-			
+			// output by the index key
 			Map<Integer, Iterable<Integer>> result = idPairs.groupByKey().collectAsMap();
 			List<Tuple2<Integer, Iterable<Integer>>> resultList = new ArrayList<Tuple2<Integer, Iterable<Integer>>>();
-			for (Entry<Integer , Iterable<Integer>> entry : result.entrySet()) {
-				Tuple2<Integer, Iterable<Integer>> item = new Tuple2<Integer, Iterable<Integer>>(entry.getKey(), entry.getValue());
+			for (Entry<Integer, Iterable<Integer>> entry : result.entrySet()) {
+				Tuple2<Integer, Iterable<Integer>> item = new Tuple2<Integer, Iterable<Integer>>(entry.getKey(),
+						entry.getValue());
 				resultList.add(item);
 			}
-			
+
+			// sort the output
 			Collections.sort(resultList, new Comparator<Tuple2<Integer, Iterable<Integer>>>() {
 				public int compare(Tuple2<Integer, Iterable<Integer>> t1, Tuple2<Integer, Iterable<Integer>> t2) {
 					return t1._1 - t2._1;
 				}
 			});
 
-			for (Tuple2<Integer , Iterable<Integer>> entry : resultList) {
+			// output the lines
+			for (Tuple2<Integer, Iterable<Integer>> entry : resultList) {
 				Integer key = entry._1;
 				List<Integer> values = IteratorUtils.toList(entry._2.iterator());
 				Collections.sort(values);

@@ -4,9 +4,6 @@ import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -33,7 +30,7 @@ public class Union {
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "UnionQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "Union";
+	private static final String SPARK_APP_NAME = "Group2-Union";
 	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
@@ -58,7 +55,8 @@ public class Union {
 			String outputFile = DEFAULT_OUTPUT_FILE;
 
 			if (args.length == 0) {
-				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME + " <inputFile> <outputFile>)");
+				System.out.println("Using default input and output files (Usage: " + SPARK_APP_NAME
+						+ " <inputFile> <outputFile>)");
 			} else if (args.length == 2) {
 				inputFile = args[0];
 				outputFile = args[1];
@@ -85,12 +83,16 @@ public class Union {
 
 			// to use local spark or distributed one
 			if (SPARK_LOCAL) {
-//				sc = new JavaSparkContext("local", SPARK_APP_NAME); 
-				SparkConf conf = new SparkConf().setAppName("Group2-Union");
-				sc = new JavaSparkContext(conf); 
+				 sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME, SPARK_HOME,
-						new String[] { "target/union-0.1.jar", "../lib/jts-1.8.jar" });
+				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				// SPARK_HOME,
+				// new String[] { "target/union-0.1.jar", "../lib/jts-1.8.jar"
+				// });
+
+				// code from TA
+				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+				sc = new JavaSparkContext(conf);
 			}
 
 			// 1. read the lines from the input file in HDFS
@@ -114,7 +116,7 @@ public class Union {
 					return arg0.union(arg1);
 				}
 			});
-			
+
 			// convert to the format required by TA
 			List<Coordinate> coords = JTSUtils.convertGeometryToSortedCoordinates(finalPolygon);
 

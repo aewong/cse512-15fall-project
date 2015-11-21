@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      4964,        137]
-NotebookOptionsPosition[      4647,        121]
-NotebookOutlinePosition[      4993,        136]
-CellTagsIndexPosition[      4950,        133]
+NotebookDataLength[      5452,        146]
+NotebookOptionsPosition[      5134,        130]
+NotebookOutlinePosition[      5480,        145]
+CellTagsIndexPosition[      5437,        142]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -111,12 +111,21 @@ Cell[BoxData[
   3.6559362550334525`*^9, 3.6559362647983885`*^9}}],
 
 Cell[BoxData[
- GraphicsBox[{PointBox[{Thickness[Large], GrayLevel[0]}], 
+ GraphicsBox[{PointBox[CompressedData["
+1:eJwBUQGu/iFib1JlAgAAABQAAAACAAAASvGv7QaU1D/QlUD+XZWiPztG6Tqj
+mZg/nboTaIcqzr++yUsLUoGnP30W4azcmdq/szSmFgCZ1D8ePn6pfqnBP1ay
+VPjidL0/AFVODq4fu78YsU8AxcjQP6pEjc2EAtO/EQ9tb9O5xL/1C8rCRPTZ
+v5ULHnGLY8g/+Pl4s8mr1z/s7LL/BI7OP9eTtHN+sJC/sqU1cIEwsz+a+jk4
+6j7Fv6cVLeBoPtU/PNDxbrhRx7/Cgzaep7izPwD73mIi/s+/ZrSf1n58yj/L
+MFuj/5TMvy0anbmokqc/nSggJSqfyL9UY04/xOCpP84dI/d5bt4/rc0Brbn2
+2L+lXzTB9ufRP7S3Ra3x+NM/5Q+HHpHsqb/xtziIqFKHP8jztiW0ndk/RSaF
+HtbAgz++OgEsdiS7P+w5iwzia6K/XTMfLj7n0j/gcqv/
+    "]], 
    {EdgeForm[{RGBColor[1, 0, 0], Thickness[Large]}], FaceForm[None], 
     PolygonBox[{{0.074958887, -0.165982511}, {
      0.046040795, -0.192357319}}]}}]], "Output",
  CellChangeTimes->{{3.655931618343031*^9, 3.65593163962313*^9}, 
-   3.6559323451233234`*^9, 3.6559362613199186`*^9}]
+   3.6559323451233234`*^9, 3.6559362613199186`*^9, 3.656169494446527*^9}]
 }, Open  ]]
 },
 WindowSize->{1584, 817},
@@ -137,7 +146,7 @@ CellTagsIndex->{}
 Notebook[{
 Cell[CellGroupData[{
 Cell[580, 22, 3693, 88, 292, "Input"],
-Cell[4276, 112, 355, 6, 344, "Output"]
+Cell[4276, 112, 842, 15, 447, "Output"]
 }, Open  ]]
 }
 ]
