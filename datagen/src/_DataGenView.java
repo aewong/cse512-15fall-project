@@ -1,5 +1,3 @@
-package datagen;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -7,26 +5,32 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 
-public class DataGenView extends JPanel {
+public class _DataGenView extends JPanel {
+    private static final long serialVersionUID = 6509217204123368745L;
+
     private double minx;
     private double maxx;
     private double miny;
     private double maxy;
 
-    private double marginRatio = 0.1;
+    private double marginRatio = 0.01;
     private int marginx;
     private int marginy;
     private int winw;
     private int winh;
 
-    private static final long serialVersionUID = 6509217204123368745L;
 
-    public DataGenView(int winw, int winh) {
+    List<Rectangle> rects = new ArrayList<>();
+    List<Point> pts = new ArrayList<>();
+    List<Tuple<Point, Point>> lines = new ArrayList<>();
+
+    public _DataGenView(int winw, int winh) {
 	PointListener listener = new PointListener();
 	this.addMouseMotionListener(listener);
 	this.addMouseListener(listener);
@@ -49,6 +53,12 @@ public class DataGenView extends JPanel {
 		g.drawRect(r.x, r.y, r.width, r.height);
 	    }
 	}
+	g.setColor(Color.RED);
+	synchronized (lines) {
+	    for (Tuple<Point, Point> l : lines) {
+		g.drawLine(l._1.x, l._1.y, l._2.x, l._2.y);
+	    }
+	}
     }
 
     private Point winPos(double x, double y) {
@@ -66,7 +76,6 @@ public class DataGenView extends JPanel {
 	return new Point(ix, iy);
     }
 
-    List<Rectangle> rects = new ArrayList<>();
 
     public void AddRectangle(double x1, double y1, double x2, double y2) {
 	try {
@@ -92,6 +101,20 @@ public class DataGenView extends JPanel {
 
     public void AddPoint(double x, double y) {
 
+    }
+    
+    public void AddLine(double x1, double y1, double x2, double y2) {
+	try {
+	    updateMinMax(x1, y1);
+	    updateMinMax(x2, y2);
+	    Point p1 = winPos(x1, y1);
+	    Point p2 = winPos(x2, y2);
+	    synchronized (lines) {
+		lines.add(new Tuple<Point, Point>(p1,p2));
+	    }
+	} catch (Exception e) {
+	    e.printStackTrace();
+	}
     }
 
     // listener class that listens to the mouse
@@ -133,4 +156,22 @@ public class DataGenView extends JPanel {
 	public void mouseMoved(MouseEvent arg0) {
 	}
     } // end of PointListener
+    
+    public void clean() {
+	synchronized(rects) {
+	rects.clear();
+	}
+	synchronized(pts) {
+	pts.clear();
+	}
+    }
+
+    public class Tuple<X, Y> { 
+	  public final X _1; 
+	  public final Y _2; 
+	  public Tuple(X _1, Y _2) { 
+	    this._1 = _1;
+	    this._2 = _2;
+	  } 
+	} 
 } // end of Whole Panel Class
