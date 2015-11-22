@@ -19,10 +19,12 @@ testdata/RangeQueryTestData.csv
 testdata/UnionQueryResult.csv
 testdata/UnionQueryTestData.csv"
 
-$HADOOP_HOME/bin/hdfs dfs -rm -r $HDFS_PATH/*
+# DANGER!!! delete all the files
+#$HADOOP_HOME/bin/hdfs dfs -rm -r $HDFS_PATH/*
 
 for file in $INPUT_FILES
 do 
 	echo "copying ${file##*/}"
+	$HADOOP_HOME/bin/hdfs dfs -rm -r $HDFS_PATH/${file##*/}
 	$HADOOP_HOME/bin/hdfs dfs -put $file $HDFS_PATH/${file##*/}
 done
