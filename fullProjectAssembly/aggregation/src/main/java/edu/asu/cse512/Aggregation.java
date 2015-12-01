@@ -107,14 +107,14 @@ public class Aggregation {
 			if (SPARK_LOCAL) {
 				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				 sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
-				 SPARK_HOME,
-				 new String[] { "target/aggregation-0.1.jar",
-				 "../lib/jts-1.8.jar" });
+//				 sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+//				 SPARK_HOME,
+//				 new String[] { "target/aggregation-0.1.jar",
+//				 "../lib/jts-1.8.jar" });
 
 				// code from TA
-//				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
-//				sc = new JavaSparkContext(conf);
+				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+				sc = new JavaSparkContext(conf);
 			}
 
 			// polygons or points

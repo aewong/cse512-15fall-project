@@ -11,6 +11,7 @@ local.properties
 .settings/
 .loadpath
 *.*~
+*.zip
 
 # Eclipse Core
 .project
