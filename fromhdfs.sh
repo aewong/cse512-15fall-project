@@ -1,5 +1,5 @@
 HADOOP_HOME="/home/user/hadoop-2.7.1"
-HDFS_PATH="hdfs://192.168.184.165:54310/"
+HDFS_PATH="hdfs://192.168.1.56:54310/"
 
 OUTPUT_PATH="output"
 OUTPUT_FILES="

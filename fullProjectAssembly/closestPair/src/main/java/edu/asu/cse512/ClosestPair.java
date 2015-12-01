@@ -27,17 +27,20 @@ import com.vividsolutions.jts.geom.LineSegment;
 import scala.Tuple2;
 
 public class ClosestPair {
-	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
-
+	private static final String HDFS_PATH = "hdfs://192.168.1.56:54310/";
 	private static final String LOCAL_PATH = "";
+
+	private static final int POWER = 3;
+
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "ClosestPairTestData.csv";
+//	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "ClosestPairTestData.csv";
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "points" + POWER + ".dat";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "ClosestPairOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "Group2-ClosestPair";
-	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
+	private static final String SPARK_APP_NAME = "Group2-ClosestPair-" + POWER;
+	private static final String SPARK_MASTER = "spark://192.168.1.56:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
 	private static final double EPSL = 0.00000001;
@@ -93,14 +96,14 @@ public class ClosestPair {
 			if (SPARK_LOCAL) {
 				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
-				// SPARK_HOME,
-				// new String[] { "target/closestPair-0.1.jar",
-				// "../lib/jts-1.8.jar" });
+				 sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				 SPARK_HOME,
+				 new String[] { "target/closestPair-0.1.jar",
+				 "../lib/jts-1.8.jar" });
 
 				// code from TA
-				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
-				sc = new JavaSparkContext(conf);
+//				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+//				sc = new JavaSparkContext(conf);
 			}
 
 			// Read input points

@@ -33,23 +33,22 @@ import com.vividsolutions.jts.geom.Geometry;
 import scala.Tuple2;
 
 public class Aggregation {
-	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
-
+	private static final String HDFS_PATH = "hdfs://192.168.1.56:54310/";
 	private static final String LOCAL_PATH = "";
-	private static final boolean FILE_LOCAL = true;
-	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	// private static final String DEFAULT_INPUT_FILE1 = FILE_PATH +
-	// "idAggregationInput1_100.csv";
-	// private static final String DEFAULT_INPUT_FILE2 = FILE_PATH +
-	// "idAggregationInput2_100.csv";
-	private static final boolean TEST = true;// for manual test
-	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + (TEST?"test":"")+"AggregationInput1.csv";
-	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + (TEST?"test":"")+"AggregationInput2.csv";
-	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + (TEST?"test":"")+"AggregationOutput.csv";
+	
+	private static final int POWER = 6;
 
-	private static final boolean SPARK_LOCAL = true;
-	private static final String SPARK_APP_NAME = "Group2-Aggregatation";
-	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
+	private static final boolean FILE_LOCAL = false;
+	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "AggregationPoints" + POWER + ".csv";
+	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "AggregationRects" + POWER + ".csv";
+//	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "testAggregationInput1.csv";
+//	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "testAggregationInput2.csv";
+	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "AggregationOutput.csv";
+
+	private static final boolean SPARK_LOCAL = false;
+	private static final String SPARK_APP_NAME = "Group2-Aggregatation-full";
+	private static final String SPARK_MASTER = "spark://192.168.1.56:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
 	private static final double EPSL = 0.00000001;
@@ -108,14 +107,14 @@ public class Aggregation {
 			if (SPARK_LOCAL) {
 				sc = new JavaSparkContext("local", SPARK_APP_NAME);
 			} else {
-				// sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
-				// SPARK_HOME,
-				// new String[] { "target/aggregation-0.1.jar",
-				// "../lib/jts-1.8.jar" });
+				 sc = new JavaSparkContext(SPARK_MASTER, SPARK_APP_NAME,
+				 SPARK_HOME,
+				 new String[] { "target/aggregation-0.1.jar",
+				 "../lib/jts-1.8.jar" });
 
 				// code from TA
-				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
-				sc = new JavaSparkContext(conf);
+//				SparkConf conf = new SparkConf().setAppName(SPARK_APP_NAME);
+//				sc = new JavaSparkContext(conf);
 			}
 
 			// polygons or points
@@ -167,12 +166,12 @@ public class Aggregation {
 			final double RECT_MINY = -14.3738;
 			final double RECT_MAXY = 71.34132;
 
-			final double MIN_X = (TEST?1: Math.min(POINT_MINX, RECT_MINX));
-			final double MAX_X = (TEST?10: Math.max(POINT_MAXX, RECT_MAXX));
-			final double MIN_Y = (TEST?1 :Math.min(POINT_MINY, RECT_MINY));
-			final double MAX_Y = (TEST?10 :Math.max(POINT_MAXY, RECT_MAXY));
-			final int TAG_ROWS = TEST?2 :20;
-			final int TAG_COLS = TEST?2 :20;
+			final double MIN_X = Math.min(POINT_MINX, RECT_MINX);
+			final double MAX_X = Math.max(POINT_MAXX, RECT_MAXX);
+			final double MIN_Y = Math.min(POINT_MINY, RECT_MINY);
+			final double MAX_Y = Math.max(POINT_MAXY, RECT_MAXY);
+			final int TAG_ROWS = 20;
+			final int TAG_COLS = 20;
 			
 			// evenly divide range into many rectangle areas with tag
 			// ROWID_COLID
@@ -189,7 +188,7 @@ public class Aggregation {
 					Double x = Double.parseDouble(strs[1]);
 					Double y = Double.parseDouble(strs[2]);
 					String tag = getTag(MIN_X, MIN_Y, MAX_X, MAX_Y, x, y, TAG_ROWS, TAG_COLS);
-					System.out.println("tagged: " + t + " --> " + tag);
+//					System.out.println("tagged: " + t + " --> " + tag);
 					return new Tuple2<String, String>(tag, t);
 				}
 			});
@@ -210,7 +209,7 @@ public class Aggregation {
 							for (Integer y : ytags) {
 								for (Integer x : xtags) {
 									String tag = y + "_" + x;
-									System.out.println("tagged: " + t + " --> " + tag);
+//									System.out.println("tagged: " + t + " --> " + tag);
 									ret.put(tag, new Tuple2<String, String>(tag, t));
 								}
 							}
@@ -233,10 +232,10 @@ public class Aggregation {
 						}
 					});
 
-			List<Tuple2<String, Tuple2<String, String>>> prt1 = filteredLines.collect();
-			for (Tuple2<String, Tuple2<String, String>> t : prt1) {
-				System.out.println(t._1 + ", " + t._2);
-			}
+//			List<Tuple2<String, Tuple2<String, String>>> prt1 = filteredLines.collect();
+//			for (Tuple2<String, Tuple2<String, String>> t : prt1) {
+//				System.out.println(t._1 + ", " + t._2);
+//			}
 
 			JavaPairRDD<Integer, Integer> rectids = filteredLines
 					.mapToPair(new PairFunction<Tuple2<String, Tuple2<String, String>>, Integer, Integer>() {
@@ -251,9 +250,6 @@ public class Aggregation {
 					});
 
 			rectids = rectids.reduceByKey(new Function2<Integer, Integer, Integer>() {
-				/**
-				 * 
-				 */
 				private static final long serialVersionUID = -1285137147882687549L;
 
 				public Integer call(Integer v1, Integer v2) throws Exception {
@@ -264,8 +260,8 @@ public class Aggregation {
 			List<Tuple2<Integer, Integer>> temp = rectids.collect();
 			for (Tuple2<Integer, Integer> t : temp) {
 				System.out.println(t._1 + ", " + t._2);
+				bw.write(t._1 + ", " + t._2);
 			}
-
 
 			bw.flush();
 		} catch (Exception e) {

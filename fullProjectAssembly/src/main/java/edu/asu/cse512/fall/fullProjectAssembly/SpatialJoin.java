@@ -23,7 +23,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import scala.Tuple2;
 
 public class SpatialJoin {
-	private static final String HDFS_ROOT_PATH = "hdfs://192.168.184.165:54310/";
+	private static final String HDFS_ROOT_PATH = "hdfs://192.168.1.56:54310/";
 	private static final String LOCAL_PATH = "/home/user/";
 
 	private static final String INPUT_FILE_1 = "join_input_1.csv";

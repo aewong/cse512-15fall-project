@@ -27,7 +27,7 @@ import org.apache.hadoop.util.Progressable;
 public class HDFSFileCopy {
 	public static void main(String[] args) {
 		try {
-			String hdfsPath = "hdfs://192.168.184.165:54310/";
+			String hdfsPath = "hdfs://192.168.1.56:54310/";
 			String localPath = "/home/user/";
 
 			String src = "union_input.csv";
