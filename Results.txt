@@ -1,0 +1,75 @@
+The tests are carried out on test data sets with different size.
+A test of size n means the test contains 10^n items. For example, "size5" is using a test of size 100000
+The running time of the functions are as follows:
+
+Union:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	14	12	?
+size2	15	11	?
+size3	16	13	?
+size4	32	20	?
+size5	46	32	?
+size6	204	108	66
+
+
+Convex Hull:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	13	6	?
+size2	13	11	?
+size3	13	11	?
+size4	17	18	?
+size5	31	25	?
+size6	58	35	?
+size7	300	210	96
+
+
+Closest Pair:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	19	10	?
+size2	20	13	?
+size3	60	34	26
+
+
+Farthest Pair:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	16	9	?
+size2	12	11	?
+size3	16	14	?
+size4	18	20	?
+size5	31	22	?
+size6	102	36	?
+size7	960	150	96
+
+
+Range Query:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	11	12	?
+size2	12	12	?
+size3	11	9	?
+size4	17	10	?
+size5	24	11	?
+size6	114	20	14
+
+
+Join Query:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	12	11	?
+size2	20	15	?
+size3	90	38	?
+size4	1860	660	1140
+
+
+Aggregation:
+---------------------------------------------------
+	1 node	2 nodes	4 nodes
+size1	12	11	?
+size2	14	10	?
+size3	15	10	?
+size4	32	17	?
+size5	522	256	348

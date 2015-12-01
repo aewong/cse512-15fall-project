@@ -18,3 +18,5 @@ FILE_LOCAL : use local file system or hdfs
 SPARK_LOCAL : use local spark or remote spark
 
 4. Passed tests when run in Eclipse, using hdfs and remote spark
+
+5. the results of the running time is in the Results.txt
