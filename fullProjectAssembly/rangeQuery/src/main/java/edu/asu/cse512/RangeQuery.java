@@ -25,18 +25,21 @@ import com.vividsolutions.jts.geom.Point;
 import scala.Tuple2;
 
 public class RangeQuery {
-	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
-
+	private static final String HDFS_PATH = "hdfs://192.168.1.56:54310/";
 	private static final String LOCAL_PATH = "";
+
+	private static final int POWER = 6;
+
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "RangeQueryTestData.csv";
+//	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "RangeQueryTestData.csv";
+	private static final String DEFAULT_INPUT_FILE1 = FILE_PATH + "pointsid" + POWER + ".dat";
 	private static final String DEFAULT_INPUT_FILE2 = FILE_PATH + "RangeQueryRectangle.csv";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "RangeQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "Group2-RangeQuery";
-	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
+	private static final String SPARK_APP_NAME = "Group2-RangeQuery-" + POWER;
+	private static final String SPARK_MASTER = "spark://192.168.1.56:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
 	private static final double EPSL = 0.00000001;
@@ -119,9 +122,9 @@ public class RangeQuery {
 			// read the query window
 			JavaRDD<String> lines2 = sc.textFile(inputFile2);
 			List<String> strs = lines2.collect();
-			if (null == strs || strs.size() != 1) {
-				throw new Exception("more than one line in file " + inputFile2);
-			}
+//			if (null == strs || strs.size() != 1) {
+//				throw new Exception("more than one line in file " + inputFile2);
+//			}
 			final Geometry window = JTSUtils.getRectangleFromLeftTopAndRightBottom(strs.get(0));
 
 			// filter the pairs to get 

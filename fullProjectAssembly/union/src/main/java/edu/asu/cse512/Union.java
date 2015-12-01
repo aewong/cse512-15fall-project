@@ -21,17 +21,20 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class Union {
-	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
+	private static final String HDFS_PATH = "hdfs://192.168.1.56:54310/";
 	private static final String LOCAL_PATH = "";
+	
+	private static final int POWER = 6;
 
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "UnionQueryTestData.csv";
+//	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "UnionQueryTestData.csv";
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "rects" + POWER + ".dat";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "UnionQueryOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "Group2-Union";
-	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
+	private static final String SPARK_APP_NAME = "Group2-Union-" + POWER;
+	private static final String SPARK_MASTER = "spark://192.168.1.56:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
 	/*

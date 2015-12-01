@@ -29,17 +29,20 @@ import com.vividsolutions.jts.geom.LineSegment;
 import scala.Tuple2;
 
 public class FarthestPair {
-	private static final String HDFS_PATH = "hdfs://192.168.184.165:54310/";
-
+	private static final String HDFS_PATH = "hdfs://192.168.1.56:54310/";
 	private static final String LOCAL_PATH = "";
+
+	private static final int POWER = 7;
+
 	private static final boolean FILE_LOCAL = false;
 	private static final String FILE_PATH = FILE_LOCAL ? LOCAL_PATH : HDFS_PATH;
-	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "FarthestPairTestData.csv";
+//	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "FarthestPairTestData.csv";
+	private static final String DEFAULT_INPUT_FILE = FILE_PATH + "points" + POWER + ".dat";
 	private static final String DEFAULT_OUTPUT_FILE = FILE_PATH + "FarthestPairOutput.csv";
 
 	private static final boolean SPARK_LOCAL = false;
-	private static final String SPARK_APP_NAME = "Group2-FarthestPair";
-	private static final String SPARK_MASTER = "spark://192.168.184.165:7077";
+	private static final String SPARK_APP_NAME = "Group2-FarthestPair-" + POWER;
+	private static final String SPARK_MASTER = "spark://192.168.1.56:7077";
 	private static final String SPARK_HOME = "/home/user/spark-1.5.0-bin-hadoop2.6";
 
 	/*
